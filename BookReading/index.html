@@ -1,0 +1,328 @@
+<meta name="robots" content="noindex" />
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="assets/js/vendor/flipbook/deploy/" />
+    <link rel="stylesheet" href="css/font-awesome.css" />
+    <link rel="stylesheet" href="css/flipbook.style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+
+    <script src="js/flipbook.min.js"></script>
+    <title>pdf</title>
+    <meta property="og:title" content="UTPL profile" />
+    <!-- <meta
+      property="og:image"
+      content="https://s3.amazonaws.com/designrr/universystechnologies_at_gmail.com_136279/47e3b5a9d2d82e8ecdfe0bd176344df88c81b8b903ef03c4081b75616dff8e3f"
+    /> -->
+    <!-- <meta
+      property="og:image:secure_url"
+      content="https://s3.amazonaws.com/designrr/universystechnologies_at_gmail.com_136279/47e3b5a9d2d82e8ecdfe0bd176344df88c81b8b903ef03c4081b75616dff8e3f"
+    /> -->
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:description" content="" />
+    <style>
+      body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .flipbook-share .social.networks-3.center {
+        margin-left: auto !important;
+      }
+      .flipbook-main-wrapper {
+        background: transparent !important
+        ;
+      }
+    </style>
+    <script type="text/javascript">
+      var start = Date.now();
+      function decodeHTMLEntities(text) {
+        return $("<textarea/>").html(text).text();
+      }
+      try {
+        var options = JSON.parse(decodeHTMLEntities(" "));
+      } catch (e) {
+        options = { backgroundColor: "rgb(81, 85, 88)" };
+      }
+
+      var applyOptions = function (selector, options) {
+        const $previewContainer = $(selector);
+        $previewContainer.css("background", "");
+
+        if (options.bgImgSize === "none") {
+          //options.backgroundImage = "";
+          $previewContainer.css("background-image", "");
+          $previewContainer.css("background-size", "");
+          $previewContainer.css("background-repeat", "");
+        } else if (options.bgImgSize !== "repeat") {
+          $previewContainer.css("background-size", options.bgImgSize);
+          $previewContainer.css("background-repeat", "no-repeat");
+        } else if (options.bgImgSize === "repeat") {
+          $previewContainer.css("background-size", "");
+          $previewContainer.css("background-repeat", options.bgRepeat);
+        } else {
+          $previewContainer.css("background-repeat", null);
+          $previewContainer.css("background-size", "");
+        }
+
+        if (options.backgroundColor) {
+          $previewContainer.css("background-color", options.backgroundColor);
+        } else {
+          $previewContainer.css("background-color", null);
+        }
+
+        if (options.backgroundImage && options.bgImgSize !== "none") {
+          const bg = 'url("' + options.backgroundImage + '")';
+          $previewContainer.css("background-image", bg);
+        } else {
+          $previewContainer.css("background-image", "");
+        }
+
+        $previewContainer.css("background-position", "center");
+      };
+
+      var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+          sURLVariables = sPageURL.split("&"),
+          sParameterName,
+          i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+          sParameterName = sURLVariables[i].split("=");
+
+          if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+          }
+        }
+      };
+
+      var showShare = getUrlParameter("h") % 2 !== 1;
+      var rightToLeft = getUrlParameter("rtl") === "1" || options.rtl;
+      var singlePageMode = getUrlParameter("singlePage") === "1";
+      var startPage = parseInt(getUrlParameter("startPage"));
+      if (!isFinite(startPage)) {
+        startPage = 1;
+      }
+      var toggleSingleOrDoublePage = function () {
+        var urlParams = new URLSearchParams(window.location.search);
+        var newSinglePage = singlePageMode ? "0" : "1";
+        urlParams.set("singlePage", newSinglePage);
+        var cPage = fBook.cPage[0];
+        urlParams.set("startPage", cPage + 1);
+        window.location.search = urlParams;
+      };
+      var setBtnSizes = function (w, h) {
+        $(".flipbook-menu span.fa").css({
+          width: w,
+          "max-width": w,
+          "font-size": h,
+        });
+        console.log("changed button sizes to " + w + " and " + h);
+      };
+      var refreshButtonSizes = function () {
+        var isLandscape = false;
+        if (window.screen.orientation) {
+          isLandscape = window.screen.orientation.type === "landscape-primary";
+        } else if (window.orientation !== undefined) {
+          //mobile Safari is using this deprecated APIs
+          isLandscape = window.orientation === -90 || window.orientation === 90;
+        }
+
+        var width = 24 * devicePixelRatio;
+        var height = 24 * devicePixelRatio;
+        if (isLandscape) {
+          var ratio = 1 / 2;
+          width = Math.floor(ratio * width);
+          height = Math.floor(ratio * height);
+        }
+        width += "px";
+        height += "px";
+        setBtnSizes(width, height);
+      };
+      window.onorientationchange = function (event) {
+        refreshButtonSizes();
+      };
+      var attemptCounter = 0;
+      var addTogglePageModeBtn = function () {
+        if (attemptCounter > 6000) {
+          //this will happen if the flipbook fails to load  in 10 minutes
+          console.log("Failed to add the toggle page mode button");
+          return;
+        }
+        var $anchor = $('span[data-name="btnExpand"]');
+        if ($anchor.length === 0) {
+          //GUI is not loaded yet
+          setTimeout(addTogglePageModeBtn, 100);
+          attemptCounter++;
+          console.log("Skip adding the toggle page mode button");
+          return;
+        }
+
+        console.log("Adding the toggle page mode button");
+        var $toggleBtn = $(
+          '<span data-name="btnToggle" title="Toggle Single or Double Page"  class="fa-book flipbook-icon-fa flipbook-menu-btn skin-color fa flipbook-color-light" style="font-size: 14px; margin: 2px; border-radius: 2px; background: rgba(0, 0, 0, 0) none repeat scroll 0% 0%; display: inline-block;"></span>'
+        );
+        $anchor.after($toggleBtn);
+        $toggleBtn.on("click", toggleSingleOrDoublePage);
+
+        if (fBook.options.isMobile || isIpadOS()) {
+          refreshButtonSizes();
+        }
+      };
+      var getSafariVersion = function (ua) {
+        var parts = ua.split(" Version/");
+        if (parts.length !== 2) {
+          console.log(
+            "failing to detect Safari version, assume something old!"
+          );
+          return false;
+        }
+        parts = parts[1].split(" ");
+        if (parts.length !== 2) {
+          console.log(
+            "failing to detect Safari version, assume something old. 2nd!"
+          );
+          return false;
+        }
+        return parseFloat(parts[0]);
+      };
+      var isNewSafariDesktop = function () {
+        //var ua = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15"
+        var ua = navigator.userAgent;
+        var isSafari =
+          navigator.vendor &&
+          navigator.vendor.indexOf("Apple") > -1 &&
+          ua &&
+          ua.indexOf("CriOS") === -1 &&
+          ua.indexOf("FxiOS") === -1;
+        if (isSafari === true) {
+          var v = getSafariVersion(ua);
+          return v && v >= 15;
+        } else {
+          return false;
+        }
+      };
+
+      var isIpadOS = function () {
+        return (
+          navigator.maxTouchPoints &&
+          navigator.maxTouchPoints > 2 &&
+          /MacIntel/.test(navigator.platform)
+        );
+      };
+      $(document).ready(function () {
+        applyOptions("body", options);
+        var ready = Date.now();
+        console.log(ready - start);
+        console.log(FLIPBOOK.pdfjsSrc);
+        //NOTE disabled CDN use - there is a timing issue that can cause scripts not to be loaded when shit runs (bug in flipbook code)
+        //FLIPBOOK.pdfjsSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@2.3.200/build/pdf.min.js";
+        //FLIPBOOK.pdfjsworkerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@2.3.200/build/pdf.worker.min.js";
+
+        var viewMode;
+        if (isIpadOS()) {
+          console.log("detected iOS/iPad, disabling WebGl");
+          viewMode = "2d";
+        } else if (isNewSafariDesktop()) {
+          console.log(
+            "detected Safari newer or equal then 15, disabling WebGl"
+          );
+          viewMode = "2d";
+        } else {
+          console.log("We will use webgl");
+          viewMode = "webgl";
+        }
+        //var viewMode = "2d";
+        window.fBook = $("#container").flipBook({
+          pdfUrl:
+            "Profile-IQ.pdf",
+          startPage: startPage,
+          singlePageMode: singlePageMode,
+          viewMode: viewMode,
+          mobile: {
+            viewMode: "2d",
+            btnAutoplay: {
+              enabled: false,
+            },
+          },
+          rightToLeft: rightToLeft,
+          assets: {
+            preloader: "images/preloader.jpg",
+            overlay: "images/overlay.png",
+            transparent: "images/transparent.png",
+            flipMp3: "mp3/turnPage.mp3",
+          },
+          btnDownloadPages: {
+            enabled: false,
+            title: "Download",
+            icon: "fa-download",
+            url: "Profile-IQ.pdf",
+          },
+          btnBookmark: {
+            enabled: false,
+          },
+          btnSelect: {
+            enabled: false,
+          },
+          btnDownloadPdf: {
+            forceDownload: false,
+            enabled: showShare,
+            title: "Download PDF",
+            icon: "fa-download",
+            url: "Profile-IQ.pdf",
+            openInNewWindow: true,
+          },
+          btnShare: {
+            enabled: showShare,
+            title: "Share",
+            icon: "fa-link",
+          },
+          btnPrint: {
+            enabled: false,
+            title: "Print",
+            icon: "fa-print",
+            icon2: "print",
+          },
+          btnToc: {
+            enabled: false,
+            title: "Table of content",
+            icon: "fa-list-ol",
+          },
+          //sharing
+          pinterest: { enabled: false }, //disable pinterest
+          google_plus: {
+            enabled: showShare,
+            url: encodeURIComponent(window.location.href), //lib is buggy and is not encoding
+          },
+          twitter: {
+            enabled: showShare,
+            url: encodeURIComponent(window.location.href), //lib is buggy and is not cncoding
+            description: null,
+          },
+          facebook: {
+            enabled: showShare,
+            load_sdk: true,
+            url: encodeURIComponent(window.location.href), //lib is buggy and is not cncoding
+            app_id: null,
+            title: null,
+            caption: null,
+            description: null,
+            image: null,
+          },
+          email: { enabled: false }, //disable email
+        });
+        setTimeout(addTogglePageModeBtn, 100);
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="container"></div>
+  </body>
+</html>
